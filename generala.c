@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 //random
 #include <time.h>
 #include <stdlib.h>
@@ -49,14 +50,33 @@ void mostrarDados(){
 }
 
 void mostrarJuegosPosibles(){
+	int valorPosible;
 	printf("Posibles Juegos:\n");
-	for(int i=0; i<MAX_DADO; i++)
-		printf("%d: %d\n", (i+1), datos->posiblesJuegos[i]);
-	printf("E: %d\n", datos->posiblesJuegos[E]);
-	printf("F: %d\n", datos->posiblesJuegos[F]);
-	printf("P: %d\n", datos->posiblesJuegos[P]);
-	printf("G: %d\n", datos->posiblesJuegos[G]);
-	printf("GG: %d\n", datos->posiblesJuegos[GG]);
+	for(int i=0; i<MAX_DADO; i++){
+		valorPosible= datos->posiblesJuegos[i];
+		if(valorPosible>0)
+			printf("%d: %d\n", (i+1), valorPosible);
+	}
+	valorPosible= datos->posiblesJuegos[E];
+	if(valorPosible>0)
+		printf("E: %d\n", valorPosible);
+
+	valorPosible= datos->posiblesJuegos[F];
+	if(valorPosible>0)
+		printf("F: %d\n", valorPosible);
+
+	valorPosible= datos->posiblesJuegos[P];
+	if(valorPosible>0)
+		printf("P: %d\n", valorPosible);
+
+	valorPosible= datos->posiblesJuegos[G];
+	if(valorPosible>0)
+		printf("G: %d\n", valorPosible);
+
+	valorPosible= datos->posiblesJuegos[GG];
+	if(valorPosible>0)
+		printf("GG: %d\n", valorPosible);
+
 	printf("--------------\n");
 }
 
@@ -178,7 +198,24 @@ int main(){
 		
 		//si ingreso ANOTAR:
 		if(opcion=='a'){
-			printf("se anoto el valor.\n");			
+			char charJuego;
+			int nroJuego;
+			int seAnoto=0;
+			while(!seAnoto){
+				printf("ingrese el juego a anotar:\n");
+				scanf(" %c",&charJuego);
+				//casteo de char a entero
+				nroJuego= atoi(&charJuego);
+				printf("el nro es: %d\n", nroJuego);
+				//chequear si el juego a anotar es valido:
+				if(datos->tablaPuntajes[nroJuego]==0 && datos->posiblesJuegos[nroJuego]>0){
+					datos->tablaPuntajes[nroJuego]=datos->posiblesJuegos[nroJuego];
+					printf("se agrego correctamente el juego a la tabla de puntajes.\n");
+					seAnoto=1;
+				}
+				else printf("Error! no puede anotar dicho juego.\n");
+			}
+			
 			nroTiro=MAX_TIROS+1;	//consumo todos mis tiros.
 		}
 
