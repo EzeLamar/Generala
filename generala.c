@@ -7,6 +7,7 @@
 #define MAX_DADO 6
 #define CANT_DADOS 5
 #define JUEGOS_DADOS 11
+#define MAX_TIROS 3
 
 //JUEGOS
 #define NUM_1 0
@@ -32,11 +33,31 @@ struct datos_juego{
 //GLOBALES
 struct datos_juego *datos;
 int dados[CANT_DADOS];
+int nroTiro=1;
 
 int tirarDado(){
 	//se obtiene un numero entre 1 y 6
 	   // should only be called once
 	return (rand()%6)+1;
+}
+
+void mostrarDados(){
+	for(int i=1; i<=CANT_DADOS; i++){
+		printf("%d° dado: %d\n",i,dados[i-1]);
+	}
+	printf("----------\n");
+}
+
+void mostrarJuegosPosibles(){
+	printf("Posibles Juegos:\n");
+	for(int i=0; i<MAX_DADO; i++)
+		printf("%d: %d\n", (i+1), datos->posiblesJuegos[i]);
+	printf("E: %d\n", datos->posiblesJuegos[E]);
+	printf("F: %d\n", datos->posiblesJuegos[F]);
+	printf("P: %d\n", datos->posiblesJuegos[P]);
+	printf("G: %d\n", datos->posiblesJuegos[G]);
+	printf("GG: %d\n", datos->posiblesJuegos[GG]);
+	printf("--------------\n");
 }
 
 void juegosPosibles(){
@@ -119,30 +140,61 @@ int main(){
 
 	//genero la semilla para obtener los dados segun la hora.
 	srand(time(NULL));
+
 	int valor;
-	//genero 5 nros al azar y asigno a los dados
+	//PRIMER TURNO:
+	//tiro todos los dados al azar..
 	for(int i=1; i<=CANT_DADOS; i++){
-		valor= tirarDado();
-		dados[i-1]=valor;
+		dados[i-1]=tirarDado();
 	}
 
-    //muestro por pantalla los dados obtenidos.
-	for(int i=1; i<=CANT_DADOS; i++){
-		printf("tire el %d° dado: %d\n",i,dados[i-1]);
-	}
-
-	printf("\n");
-	//CHEQUEAMOS LOS JUEGOS QUE SE PUEDEN FORMAR:
+	
 //	dados[0]=1;
 //	dados[1]=1;
 //	dados[2]=1;
 //	dados[3]=1;
 //	dados[4]=1;
-	juegosPosibles();
-	for(int i=0; i<JUEGOS_DADOS; i++)
-		printf("Para %d: %d\n", (i+1), datos->posiblesJuegos[i]);
+	while(nroTiro<=MAX_TIROS){
+		printf("TIRO NRO: %d\n", nroTiro);
+		//muestro por pantalla los dados obtenidos.
+		mostrarDados();
+		//CHEQUEAMOS LOS JUEGOS QUE SE PUEDEN FORMAR:
+		juegosPosibles();
+		mostrarJuegosPosibles();
 
+		//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
+		int opcionValida=0;
+		char opcion;
+		while(!opcionValida){
+			printf("¿Desea anotar [a] o volver a tirar [t]?\n");
+			scanf(" %c",&opcion);
+			if(opcion=='a'||opcion=='t')
+				opcionValida=1;
+			if(nroTiro==MAX_TIROS && opcion=='t'){
+				printf("Ya no tiene mas tiros!\n");
+				opcionValida=0;
+			}
+		}
+		
+		//si ingreso ANOTAR:
+		if(opcion=='a'){
+			printf("se anoto el valor.\n");			
+			nroTiro=MAX_TIROS+1;	//consumo todos mis tiros.
+		}
 
-
+		//si ingreso VOLVER A TIRAR:
+		if(opcion=='t'){
+			printf("ingrese la cantidad a volver a tirar\n");
+			int cantidad=0;
+			scanf(" %d",&cantidad);
+			int dadoNro;
+			printf("ingrese las posiciones (1-5):\n");
+			for(int i=0; i<cantidad;i++){
+				scanf(" %d",&dadoNro);
+				dados[dadoNro-1]=tirarDado();
+			}
+			nroTiro++;
+		}
+	}
 	return 1;
 }
