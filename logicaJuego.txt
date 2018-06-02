@@ -2,8 +2,8 @@ programa general:
 	1) tira todos los dados
 	2) programa sugiere posibles "juegos" para "Anotar el juego".
 	3) si "quiero anotar" ent.
-			selecciono la opcion y se anota
-			termina el turno.
+			selecciono la opcion y se "Anota el juego".
+ 			termina el turno.
 		caso contrario,
 			si "es el ultimo turno"
 				selecciono la opcion y se anota
