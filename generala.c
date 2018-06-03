@@ -1,3 +1,10 @@
+/*FALTA HACER:
+	+ limpiar la tabla de puntajes al iniciar el programa.
+	+ agregar la comparacion entre los posibles juegos y la opcion escrita por consola.
+	+ corregir el metodo posiblesJuegos() para que ademas filtre a los juegos ya completados.
+	+ 
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 //random
@@ -34,7 +41,6 @@ struct datos_juego{
 //GLOBALES
 struct datos_juego *datos;
 int dados[CANT_DADOS];
-int nroTiro=1;
 
 int tirarDado(){
 	//se obtiene un numero entre 1 y 6
@@ -44,9 +50,40 @@ int tirarDado(){
 
 void mostrarDados(){
 	for(int i=1; i<=CANT_DADOS; i++){
-		printf("%d° dado: %d\n",i,dados[i-1]);
+		printf("\t%d° dado: %d\n",i,dados[i-1]);
 	}
 	printf("----------\n");
+}
+
+void mostrarTablaPuntajes(){
+	int puntaje;
+	printf("Tabla Puntajes:\n");
+	for(int i=0; i<MAX_DADO; i++){
+		puntaje= datos->tablaPuntajes[i];
+		if(puntaje>0)
+			printf("%d: %d\n", (i+1), puntaje);
+	}
+	puntaje= datos->tablaPuntajes[E];
+	if(puntaje>0)
+		printf("E: %d\n", puntaje);
+
+	puntaje= datos->tablaPuntajes[F];
+	if(puntaje>0)
+		printf("F: %d\n", puntaje);
+
+	puntaje= datos->tablaPuntajes[P];
+	if(puntaje>0)
+		printf("P: %d\n", puntaje);
+
+	puntaje= datos->tablaPuntajes[G];
+	if(puntaje>0)
+		printf("G: %d\n", puntaje);
+
+	puntaje= datos->tablaPuntajes[GG];
+	if(puntaje>0)
+		printf("GG: %d\n", puntaje);
+
+	printf("--------------\n");
 }
 
 void mostrarJuegosPosibles(){
@@ -155,83 +192,113 @@ void juegosPosibles(){
 
 
 int main(){
+
 	//inicializo el struct datos_juegos
 	datos= (struct datos_juego*) malloc(sizeof(struct datos_juego));
+	for(int i=0; i<JUEGOS_DADOS; i++)
+		datos->tablaPuntajes[i]=0;
 
 	//genero la semilla para obtener los dados segun la hora.
 	srand(time(NULL));
 
 	int valor;
-	//PRIMER TURNO:
-	//tiro todos los dados al azar..
-	for(int i=1; i<=CANT_DADOS; i++){
-		dados[i-1]=tirarDado();
-	}
 
+
+	int cantJugados=0;
 	
-//	dados[0]=1;
-//	dados[1]=1;
-//	dados[2]=1;
-//	dados[3]=1;
-//	dados[4]=1;
-	while(nroTiro<=MAX_TIROS){
-		printf("TIRO NRO: %d\n", nroTiro);
-		//muestro por pantalla los dados obtenidos.
-		mostrarDados();
-		//CHEQUEAMOS LOS JUEGOS QUE SE PUEDEN FORMAR:
-		juegosPosibles();
-		mostrarJuegosPosibles();
-
-		//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
-		int opcionValida=0;
-		char opcion;
-		while(!opcionValida){
-			printf("¿Desea anotar [a] o volver a tirar [t]?\n");
-			scanf(" %c",&opcion);
-			if(opcion=='a'||opcion=='t')
-				opcionValida=1;
-			if(nroTiro==MAX_TIROS && opcion=='t'){
-				printf("Ya no tiene mas tiros!\n");
-				opcionValida=0;
-			}
+	while(cantJugados<3){
+		printf("\t\tRONDA NRO %d!\n\n", cantJugados+1);
+		//PRIMER TURNO:
+		//tiro todos los dados al azar..
+		for(int i=1; i<=CANT_DADOS; i++){
+			dados[i-1]=tirarDado();
 		}
+
 		
-		//si ingreso ANOTAR:
-		if(opcion=='a'){
-			char charJuego;
-			int nroJuego;
-			int seAnoto=0;
-			while(!seAnoto){
-				printf("ingrese el juego a anotar:\n");
-				scanf(" %c",&charJuego);
-				//casteo de char a entero
-				nroJuego= atoi(&charJuego);
-				printf("el nro es: %d\n", nroJuego);
-				//chequear si el juego a anotar es valido:
-				if(datos->tablaPuntajes[nroJuego]==0 && datos->posiblesJuegos[nroJuego]>0){
-					datos->tablaPuntajes[nroJuego]=datos->posiblesJuegos[nroJuego];
-					printf("se agrego correctamente el juego a la tabla de puntajes.\n");
-					seAnoto=1;
+	//	dados[0]=1;
+	//	dados[1]=1;
+	//	dados[2]=1;
+	//	dados[3]=1;
+	//	dados[4]=1;
+		int nroTiro=1;
+		while(nroTiro<=MAX_TIROS){
+			printf("TIRO NRO: %d\n", nroTiro);
+			//muestro por pantalla los dados obtenidos.
+			mostrarDados();
+			//CHEQUEAMOS LOS JUEGOS QUE SE PUEDEN FORMAR:
+			juegosPosibles();
+			mostrarJuegosPosibles();
+			mostrarTablaPuntajes();
+
+			//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
+			int opcionValida=0;
+			char opcion;
+			while(!opcionValida){
+				printf("¿Desea anotar [a] o volver a tirar [t]?\n");
+				scanf(" %c",&opcion);
+				if(opcion=='a'||opcion=='t')
+					opcionValida=1;
+				if(nroTiro==MAX_TIROS && opcion=='t'){
+					printf("Ya no tiene mas tiros!\n");
+					opcionValida=0;
 				}
-				else printf("Error! no puede anotar dicho juego.\n");
 			}
 			
-			nroTiro=MAX_TIROS+1;	//consumo todos mis tiros.
-		}
-
-		//si ingreso VOLVER A TIRAR:
-		if(opcion=='t'){
-			printf("ingrese la cantidad a volver a tirar\n");
-			int cantidad=0;
-			scanf(" %d",&cantidad);
-			int dadoNro;
-			printf("ingrese las posiciones (1-5):\n");
-			for(int i=0; i<cantidad;i++){
-				scanf(" %d",&dadoNro);
-				dados[dadoNro-1]=tirarDado();
+			//si ingreso ANOTAR:
+			if(opcion=='a'){
+				char charJuego;
+				int nroJuego;
+				int seAnoto=0;
+				while(!seAnoto){
+					printf("ingrese el juego a anotar:\n");
+					scanf(" %c",&charJuego);
+					//casteo de char a entero
+					nroJuego= atoi(&charJuego);
+	//				printf("el nro es: %d\n", nroJuego);
+					nroJuego=nroJuego-1;
+					if(nroJuego==-1){
+						if(charJuego=='E')
+							nroJuego=E;
+						if(charJuego=='F')
+							nroJuego=F;
+						if(charJuego=='P')
+							nroJuego=P;
+						if(charJuego=='G')
+							nroJuego=G;
+						if(charJuego=='H')
+							nroJuego=GG;
+					}
+					//chequear si el juego a anotar es valido:
+					if(datos->tablaPuntajes[nroJuego]==0 && datos->posiblesJuegos[nroJuego]>0){
+						datos->tablaPuntajes[nroJuego]=datos->posiblesJuegos[nroJuego];
+						printf("se agrego correctamente el juego a la tabla de puntajes.\n");
+						mostrarTablaPuntajes();
+						seAnoto=1;
+					}
+					else printf("Error! no puede anotar dicho juego.\n");
+				}
+				
+				nroTiro=MAX_TIROS+1;	//consumo todos mis tiros.
 			}
-			nroTiro++;
+
+			//si ingreso VOLVER A TIRAR:
+			if(opcion=='t'){
+				printf("ingrese la cantidad a volver a tirar\n");
+				int cantidad=0;
+				scanf(" %d",&cantidad);
+				int dadoNro;
+				printf("ingrese las posiciones (1-5):\n");
+				for(int i=0; i<cantidad;i++){
+					scanf(" %d",&dadoNro);
+					dados[dadoNro-1]=tirarDado();
+				}
+				nroTiro++;
+			}
 		}
+	cantJugados++;	
 	}
+	printf("\n\n\t\tJuego Terminado!\nLos resultados son:\n");
+	mostrarTablaPuntajes();
+	
 	return 1;
 }
