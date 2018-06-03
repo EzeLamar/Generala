@@ -1,0 +1,42 @@
+programa general:
+	1) tira todos los dados
+	2) programa sugiere posibles "juegos" para "Anotar el juego".
+	3) si "quiero anotar" ent.
+			selecciono la opcion y se "Anota el juego".
+ 			termina el turno.
+		caso contrario,
+			si "es el ultimo turno"
+				selecciono la opcion y se anota
+				termina el turno.
+			caso contrario,
+				selecciono los dados que me quiero quedar (NO TODOS).
+				se vuelven a tirar los dados que quedaron.
+				vuelve paso 2)
+			
+
+Anotar el juego(JUEGO):	 
+	1) si se tiraron todos los dados y el JUEGO es "especial" y "servido"
+			se añaden 5 puntos mas al resultado de ese "juego de dados especial"
+		caso contrario, 
+			el resultado es el de un "juego de dados" comun.
+
+
+JuegosNormales(NRO): 1,2,3,4,5,6
+	se suman los valores de los dados con valor NRO.
+
+JuegosEspeciales(LETRA): E,F,P,G,H
+	Escalera (E): 
+		+combinaciones validas: 1,2,3,4,5 | 2,3,4,5,6
+		+puntuacion: 20pts
+	Full (F): 
+		+combinaciones validas: XXXYY, donde X e Y son nros diferentes.
+		+puntuacion: 30pts.
+	Poker (P):
+		+combinaciones validas: XXXXY, donde X e Y son nros diferentes.
+		+puntuacion: 40pts.
+	Generala (G):
+		+combinaciones validas: XXXXX, donde X son todos el mismo nro.
+		+puntuacion: 50pts.
+	Doble Generala (H):
+		+combinaciones validas: igual que la Generala, pero la debe tener anotada.
+		+puntuacion: 100pts.
