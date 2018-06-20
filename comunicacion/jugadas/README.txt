@@ -1,0 +1,1 @@
+aca definimos la comunicación durante el juego.
