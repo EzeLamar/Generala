@@ -37,6 +37,7 @@ typedef struct datosMesa datosMesa;
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define CREAR_MESA 1
+extern int noQuedanLugares();
 extern  datosMesa * crear_mesa_1(datosPartida *, CLIENT *);
 extern  datosMesa * crear_mesa_1_svc(datosPartida *, struct svc_req *);
 #define UNIRSE_PARTIDA 2

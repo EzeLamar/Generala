@@ -9,6 +9,7 @@ short lugaresDisponiblesMesa=0;
 char ipJugadores[MAX_JUGADORES_MESA][TAMANO_IP];
 short cantJugadoresMesa;
 short idMesa;
+int mesaLlena=0;
 
 datosMesa *
 crear_mesa_1_svc(datosPartida *argp, struct svc_req *rqstp)
@@ -19,6 +20,7 @@ crear_mesa_1_svc(datosPartida *argp, struct svc_req *rqstp)
 
 	//creamos la mesa asignandole un valor unico.
 	idMesa=1;
+	mesaLlena=0;
 	//indicamos que quedan lugares disponibles.
 	lugaresDisponiblesMesa= cantJugadoresMesa-1; //el que creo la mesa ya tiene un lugar ocupado.
 	sprintf(ipJugadores[0], "%s", argp->ipCreador);
@@ -53,8 +55,10 @@ unirse_partida_1_svc(datosJugador *argp, struct svc_req *rqstp)
 			f= fopen("jugadoresIPs.txt", "w");
 			for(int i=0; i<cantJugadoresMesa; i++){
 				fprintf(f,"%s\n", ipJugadores[i]);
-			printf("llamamos al client RPC jugadas!\nEsperamos a que comience la partida\n");
 			}
+			fclose(f);
+			//HABILITO FLAG PARA ARRANCAR RPC_JUGADAS..
+			mesaLlena=1;
 		}
 	}
 	//no hay mesas disponibles para meterse..
@@ -66,4 +70,8 @@ unirse_partida_1_svc(datosJugador *argp, struct svc_req *rqstp)
 		printf("Error, no hay mesas disponibles\n");
 	}
 	return &result;
+}
+
+int noQuedanLugares(){
+	return mesaLlena;
 }

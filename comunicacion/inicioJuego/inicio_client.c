@@ -81,17 +81,21 @@ main (int argc, char *argv[])
 {
 	char *host;
 	int opcion;
-	int cantJugadores;
+	int cantJugadores=0;
 
-	if (argc < 4) {
+	if (argc < 3 | argc > 5 ) {
 		printf ("usage: %s server_host OPCION [CANTJUGADORES]\n", argv[0]);
 		printf (" OPCION:\n\t1=crearMesa\n\t2=unirseMesa");
 		printf ("CANTJUGADORES: 2-3-4");
 		exit (1);
 	}
+
 	host = argv[1];
 	opcion= atoi(argv[2]);
-	cantJugadores= atoi(argv[3]);
+	if(opcion==1){
+		cantJugadores= atoi(argv[3]);
+	}
+
 
 	partida_1 (host, opcion, cantJugadores);
 exit (0);

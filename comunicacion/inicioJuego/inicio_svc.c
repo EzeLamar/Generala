@@ -61,6 +61,12 @@ partida_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		fprintf (stderr, "%s", "unable to free arguments");
 		exit (1);
 	}
+	if(noQuedanLugares()){
+			printf("se terminaron los lugares\n");
+			system("echo LLAMO A JUGADAS RPC");
+		}
+	else printf("no se terminaron\n");
+
 	return;
 }
 
@@ -90,7 +96,7 @@ main (int argc, char **argv)
 		fprintf (stderr, "%s", "unable to register (PARTIDA, PRIMER, tcp).");
 		exit(1);
 	}
-
+		
 	svc_run ();
 	fprintf (stderr, "%s", "svc_run returned");
 	exit (1);
