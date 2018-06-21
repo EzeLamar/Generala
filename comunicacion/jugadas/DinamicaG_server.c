@@ -33,6 +33,7 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 			//muestro los dados recibidos por pantalla..
 			printf("tirarDados:\n");
 			mostrarDados(argp->dados);
+			
 		}
 		else{
 			printf("Error! el msje es para otro jugador.\n");

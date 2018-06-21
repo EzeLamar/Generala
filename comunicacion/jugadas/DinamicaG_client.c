@@ -5,7 +5,14 @@
  */
 
 #include "DinamicaG.h"
+#define MAX_JUEGOS 11
+#define MAX_JUGADORES_MESA 4
+#define TAMANO_IP 20
 
+short tablaPuntajes[MAX_JUGADORES_MESA][MAX_JUEGOS];
+char ipJugadores[MAX_JUGADORES_MESA][TAMANO_IP];
+short cantJugadoresMesa;
+short idMesa;
 
 void
 jugada_1(char *host)
