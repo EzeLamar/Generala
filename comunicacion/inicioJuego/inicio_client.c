@@ -7,15 +7,18 @@
 #include "inicio.h"
 #include <string.h>
 
+#define CREAR_MESA 1
+#define UNIRSE_MESA 2
+
 
 void
-partida_1(char *host)
+partida_1(char *host, int opcion, int cantJugadores)
 {
 	CLIENT *clnt;
-	datosMesa  *result_1;
-	datosPartida  crear_mesa_1_arg;
-	datosMesa  *result_2;
-	datosJugador  unirse_partida_1_arg;
+	datosMesa  *result;
+	datosPartida  crear_mesa_arg;
+	datosJugador  unirse_partida_arg;
+	int conexionCorrecta=0;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, PARTIDA, PRIMER, "udp");
@@ -24,40 +27,47 @@ partida_1(char *host)
 		exit (1);
 	}
 #endif	/* DEBUG */
+	switch(opcion){
+		case CREAR_MESA:{
+			crear_mesa_arg.cantJugadores=cantJugadores;
+			//DEBERIA SOLICITAR LA IP DEL EQUIPO..
+			sprintf(crear_mesa_arg.ipCreador, "%s","192.168.0.1");
 
-	//asigno un valor de prueba
-	crear_mesa_1_arg.cantJugadores=4;
-	//DEBERIA SOLICITAR LA IP DEL EQUIPO..
-	sprintf(crear_mesa_1_arg.ipCreador, "%s","192.168.0.1");
-
-	result_2 = unirse_partida_1(&unirse_partida_1_arg, clnt);
-				if (result_2 == (datosMesa *) NULL) {
-					clnt_perror (clnt, "call failed");
-				}
-				else{
-					printf("se unio el Jugador %d a la mesa: %d\n", result_2->idJugador, result_2->idMesa);
-				}
-
-
-	result_1 = crear_mesa_1(&crear_mesa_1_arg, clnt);
-	if (result_1 == (datosMesa *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	else{
-		printf("El jugador %d creo la mesa:%d\n",result_1->idJugador ,result_1->idMesa);
-	}
-
-
-	sprintf(unirse_partida_1_arg.ipJugador, "%s", "192.168.0.5");
-
-	for(int i=0; i<5; i++){
-		result_2 = unirse_partida_1(&unirse_partida_1_arg, clnt);
-			if (result_2 == (datosMesa *) NULL) {
-				clnt_perror (clnt, "call failed");
+			result = crear_mesa_1(&crear_mesa_arg, clnt);
+			if (result == (datosMesa *) NULL) {
+				//clnt_perror (clnt, "call failed");
+				printf("Error! no se pudo unir a una mesa\n");
 			}
 			else{
-				printf("se unio el Jugador %d a la mesa: %d\n", result_2->idJugador, result_2->idMesa);
+				printf("El jugador %d creo la mesa:%d\n",result->idJugador ,result->idMesa);
+				conexionCorrecta=1;
 			}
+		}break;
+
+		case UNIRSE_MESA:{
+
+			//DEBERIA SOLICITAR LA IP DEL EQUIPO..
+			sprintf(unirse_partida_arg.ipJugador, "%s","192.168.0.5");
+
+			result = unirse_partida_1(&unirse_partida_arg, clnt);
+			if (result == (datosMesa *) NULL) {
+				//clnt_perror (clnt, "call failed");
+				printf("Error! no se pudo unir a una mesa\n");
+			}
+			else{
+				if(result->idMesa!=-1){
+					printf("se unio el Jugador %d a la mesa: %d\n", result->idJugador, result->idMesa);
+					conexionCorrecta=1;
+				}
+					
+				else 
+					printf("Error! no se pudo unir el jugador a ninguna mesa\n");
+			}
+		}break;
+	}
+	//ACA LLAMAMOS AL SERVER RPC JUGADAS..
+	if(conexionCorrecta){
+		printf("llamamos al RPC jugadas!\nEsperamos a que comience la partida\n");
 	}
 	
 #ifndef	DEBUG
@@ -70,12 +80,19 @@ int
 main (int argc, char *argv[])
 {
 	char *host;
+	int opcion;
+	int cantJugadores;
 
-	if (argc < 2) {
-		printf ("usage: %s server_host\n", argv[0]);
+	if (argc < 4) {
+		printf ("usage: %s server_host OPCION [CANTJUGADORES]\n", argv[0]);
+		printf (" OPCION:\n\t1=crearMesa\n\t2=unirseMesa");
+		printf ("CANTJUGADORES: 2-3-4");
 		exit (1);
 	}
 	host = argv[1];
-	partida_1 (host);
+	opcion= atoi(argv[2]);
+	cantJugadores= atoi(argv[3]);
+
+	partida_1 (host, opcion, cantJugadores);
 exit (0);
 }
