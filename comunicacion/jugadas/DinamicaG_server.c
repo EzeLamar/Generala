@@ -7,17 +7,175 @@
 #include "DinamicaG.h"
 #define MAX_JUEGOS 11
 #define MAX_JUGADORES_MESA 4
+#define CANT_DADOS 5
+#define MAX_DADO 6
+
+#define MAX_TIROS 3
+
+//JUEGOS
+#define NUM_1 0
+#define NUM_2 1
+#define NUM_3 2
+#define NUM_4 3
+#define NUM_5 4
+#define NUM_6 5
+#define E 6
+#define F 7
+#define P 8
+#define G 9
+#define GG 10
 
 short tablaPuntajes[MAX_JUGADORES_MESA][MAX_JUEGOS];
+short dadosActuales[5];
+short posiblesJuegos[MAX_JUEGOS];
 short idJugador;
 short idMesa;
 
-void mostrarDados(short* dados){
+//logica
+int nroTiro=1;
+
+void mostrarDados(){
 	printf("[");
-	for(int i=0; i<5; i++){
-		printf("%d,",dados[i]);
+	for(int i=0; i<CANT_DADOS; i++){
+		printf("%d,",dadosActuales[i]);
 	}
 	printf("]\n");
+}
+
+
+void mostrarTablaPuntajes(){
+	int puntaje;
+	printf("Tabla Puntajes:\n");
+	for(int i=0; i<MAX_DADO; i++){
+		puntaje= tablaPuntajes[idJugador][i];
+		if(puntaje>0)
+			printf("%d: %d\n", (i+1), puntaje);
+	}
+	puntaje= tablaPuntajes[idJugador][E];
+	if(puntaje>0)
+		printf("E: %d\n", puntaje);
+
+	puntaje= tablaPuntajes[idJugador][F];
+	if(puntaje>0)
+		printf("F: %d\n", puntaje);
+
+	puntaje= tablaPuntajes[idJugador][P];
+	if(puntaje>0)
+		printf("P: %d\n", puntaje);
+
+	puntaje= tablaPuntajes[idJugador][G];
+	if(puntaje>0)
+		printf("G: %d\n", puntaje);
+
+	puntaje= tablaPuntajes[idJugador][GG];
+	if(puntaje>0)
+		printf("GG: %d\n", puntaje);
+
+	printf("--------------\n");
+}
+
+void mostrarJuegosPosibles(){
+	int valorPosible;
+	printf("Posibles Juegos:\n");
+	for(int i=0; i<MAX_DADO; i++){
+		valorPosible= posiblesJuegos[i];
+		if(valorPosible>0)
+			printf("%d: %d\n", (i+1), valorPosible);
+	}
+	valorPosible= posiblesJuegos[E];
+	if(valorPosible>0)
+		printf("E: %d\n", valorPosible);
+
+	valorPosible= posiblesJuegos[F];
+	if(valorPosible>0)
+		printf("F: %d\n", valorPosible);
+
+	valorPosible= posiblesJuegos[P];
+	if(valorPosible>0)
+		printf("P: %d\n", valorPosible);
+
+	valorPosible= posiblesJuegos[G];
+	if(valorPosible>0)
+		printf("G: %d\n", valorPosible);
+
+	valorPosible= posiblesJuegos[GG];
+	if(valorPosible>0)
+		printf("GG: %d\n", valorPosible);
+
+	printf("--------------\n");
+}
+
+void juegosPosibles(){
+	int contadorNros[MAX_DADO]; //arreglos que cuentan cuantos apariciones de cada numero hay.
+	
+	for(int i=0; i<CANT_DADOS;i++)
+		contadorNros[i]=0;
+
+	//cuento las apariciones de cada uno de los nros entre los 5 dados.
+	for(int i=0; i<CANT_DADOS;i++){
+		int valorDado= dadosActuales[i];
+		contadorNros[valorDado-1]++;
+	}
+
+	//busco GENERALA
+	int pos=0;
+	while(pos<MAX_DADO)
+		if(contadorNros[pos]==5){
+			posiblesJuegos[G]=50;
+			break;
+		}
+		else pos++;
+
+	if(pos==MAX_DADO)
+		posiblesJuegos[G]=0;
+
+	//busco POKER
+	pos=0;
+	while(pos<MAX_DADO)
+		if(contadorNros[pos]>=4){
+			posiblesJuegos[P]=40;
+			break;
+		}
+		else pos++;
+	if(pos==MAX_DADO)
+		posiblesJuegos[P]=0;
+
+	//busco Full
+	pos=0;
+	int hayTres=0;
+	int hayDos=0;
+	while(pos<MAX_DADO){
+		if(contadorNros[pos]==2)
+			hayDos=1;
+		if(contadorNros[pos]==3)
+			hayTres=1;
+		pos++;
+	}
+	if(hayDos && hayTres)
+		posiblesJuegos[F]=30;
+	else
+		posiblesJuegos[F]=0;
+
+	//busco ESCALERA
+	int cantSeguidos=0;
+	for(int i=0; i<MAX_DADO; i++){
+		if(contadorNros[i]>0){
+			cantSeguidos++;
+			if(cantSeguidos==5)
+				break;
+		}
+
+		else cantSeguidos=0;
+	}
+	if(cantSeguidos==5)
+		posiblesJuegos[E]=20;
+	else 
+		posiblesJuegos[E]=0;
+
+	//busco Juegos de Nros (1,2,3,4,5,6)
+	for(int i=0; i<MAX_DADO; i++){
+		posiblesJuegos[i]=contadorNros[i]*(i+1);
+	}
 }
 
 posDados *
@@ -32,8 +190,78 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 		if(idJugador==argp->idJugador){
 			//muestro los dados recibidos por pantalla..
 			printf("tirarDados:\n");
-			mostrarDados(argp->dados);
-			
+			for(int i=0; i<CANT_DADOS; i++)
+				dadosActuales[i]= argp->dados[i];
+				
+			mostrarDados();
+			juegosPosibles();
+			mostrarJuegosPosibles();
+			mostrarTablaPuntajes();
+
+			//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
+			int opcionValida=0;
+			char opcion;
+			while(!opcionValida){
+				printf("¿Desea anotar [a] o volver a tirar [t]?\n");
+				scanf(" %c",&opcion);
+				if(opcion=='a'||opcion=='t')
+					opcionValida=1;
+				if(nroTiro==MAX_TIROS && opcion=='t'){
+					printf("Ya no tiene mas tiros!\n");
+					opcionValida=0;
+				}
+			}
+
+			//si ingreso ANOTAR:
+			if(opcion=='a'){
+				char charJuego;
+				int nroJuego;
+				int seAnoto=0;
+				while(!seAnoto){
+					printf("ingrese el juego a anotar:\n");
+					scanf(" %c",&charJuego);
+					//casteo de char a entero
+					nroJuego= atoi(&charJuego);
+	//				printf("el nro es: %d\n", nroJuego);
+					nroJuego=nroJuego-1;
+					if(nroJuego==-1){
+						if(charJuego=='E')
+							nroJuego=E;
+						if(charJuego=='F')
+							nroJuego=F;
+						if(charJuego=='P')
+							nroJuego=P;
+						if(charJuego=='G')
+							nroJuego=G;
+						if(charJuego=='H')
+							nroJuego=GG;
+					}
+					//chequear si el juego a anotar es valido:
+					if(tablaPuntajes[idJugador][nroJuego]==-1 && posiblesJuegos[nroJuego]>0){
+						tablaPuntajes[idJugador][nroJuego]=posiblesJuegos[nroJuego];
+						printf("se agrego correctamente el juego a la tabla de puntajes.\n");
+						mostrarTablaPuntajes();
+						result.tipoJugada= charJuego;
+						printf("anoté: %c\n", charJuego);
+						seAnoto=1;
+					}
+					else printf("Error! no puede anotar dicho juego.\n");
+				}
+			}
+			else if(opcion=='t'){		//si ingreso VOLVER A TIRAR:
+				printf("ingrese la cantidad a volver a tirar\n");
+				int cantidad=0;
+				scanf(" %d",&cantidad);
+				int dadoNro;
+				printf("ingrese las posiciones (1-5):\n");
+				for(int i=0; i<CANT_DADOS; i++)
+					result.pos[i]=0;
+				for(int i=0; i<cantidad;i++){
+					scanf(" %d",&dadoNro);
+					result.pos[dadoNro]=1;
+				}
+				result.tipoJugada='T';
+			}
 		}
 		else{
 			printf("Error! el msje es para otro jugador.\n");
@@ -42,9 +270,6 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 	else{
 		printf("Error! el msje es para otra mesa.\n");
 	}
-
-	
-
 	return &result;
 }
 

@@ -74,19 +74,9 @@ jugada_1(struct svc_req *rqstp, register SVCXPRT *transp)
 int
 main (int argc, char **argv)
 {
-	//chequeo de parametros..
-	if( argc!=3 ){
-		printf("Usage:\t ServerApp idMesa idJugador");
-		exit(1);
-	}
-	short idMesa= atoi(argv[1]);
-	short idJugador= atoi(argv[2]);
-	printf("mesa:%d\n", idMesa);
-	printf("jugador:%d\n", idJugador);
-	
-	AlIniciar(idMesa, idJugador);
-
+	AlIniciar(1,0);
 	register SVCXPRT *transp;
+
 	pmap_unset (JUGADA, PRIMERA);
 
 	transp = svcudp_create(RPC_ANYSOCK);

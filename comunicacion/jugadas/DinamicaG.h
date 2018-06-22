@@ -40,7 +40,7 @@ typedef struct posDados posDados;
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define TIRAR_DADOS 1
-extern void AlIniciar(short idMesaRecibida, short idJugadorRecibido);
+extern void AlIniciar(short idMesa, short idJugador);
 extern  posDados * tirar_dados_1(struct dados *, CLIENT *);
 extern  posDados * tirar_dados_1_svc(struct dados *, struct svc_req *);
 #define ACTUALIZAR_DADOS 2
