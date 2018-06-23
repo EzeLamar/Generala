@@ -43,31 +43,31 @@ void mostrarDados(){
 }
 
 
-void mostrarTablaPuntajes(){
+void mostrarTablaPuntajes(int jugador){
 	int puntaje;
-	printf("Tabla Puntajes:\n");
+	printf("Tabla Puntajes jugador %d:\n", jugador);
 	for(int i=0; i<MAX_DADO; i++){
-		puntaje= tablaPuntajes[idJugador][i];
+		puntaje= tablaPuntajes[jugador][i];
 		if(puntaje>0)
 			printf("%d: %d\n", (i+1), puntaje);
 	}
-	puntaje= tablaPuntajes[idJugador][E];
+	puntaje= tablaPuntajes[jugador][E];
 	if(puntaje>0)
 		printf("E: %d\n", puntaje);
 
-	puntaje= tablaPuntajes[idJugador][F];
+	puntaje= tablaPuntajes[jugador][F];
 	if(puntaje>0)
 		printf("F: %d\n", puntaje);
 
-	puntaje= tablaPuntajes[idJugador][P];
+	puntaje= tablaPuntajes[jugador][P];
 	if(puntaje>0)
 		printf("P: %d\n", puntaje);
 
-	puntaje= tablaPuntajes[idJugador][G];
+	puntaje= tablaPuntajes[jugador][G];
 	if(puntaje>0)
 		printf("G: %d\n", puntaje);
 
-	puntaje= tablaPuntajes[idJugador][GG];
+	puntaje= tablaPuntajes[jugador][GG];
 	if(puntaje>0)
 		printf("GG: %d\n", puntaje);
 
@@ -178,11 +178,51 @@ void juegosPosibles(){
 	}
 }
 
+int obtenerNroJuego(char letra){
+	int nroJuego= atoi(&letra);
+	nroJuego=nroJuego-1;
+	if(nroJuego==-1){
+		if(letra=='E')
+			nroJuego=E;
+		if(letra=='F')
+			nroJuego=F;
+		if(letra=='P')
+			nroJuego=P;
+		if(letra=='G')
+			nroJuego=G;
+		if(letra=='H')
+			nroJuego=GG;
+	}
+	return nroJuego;
+}
+
+char anotarJugada(){
+	char charJuego;
+	int nroJuego;
+	int seAnoto=0;
+	while(!seAnoto){
+		printf("ingrese el juego a anotar:\n");
+		scanf(" %c",&charJuego);
+		//casteo de char a entero
+		nroJuego=obtenerNroJuego(charJuego);
+		//chequear si el juego a anotar es valido:
+		if(tablaPuntajes[idJugador][nroJuego]==-1 && posiblesJuegos[nroJuego]>0){
+			tablaPuntajes[idJugador][nroJuego]=posiblesJuegos[nroJuego];
+			printf("se agrego correctamente el juego a la tabla de puntajes.\n");
+			mostrarTablaPuntajes(idJugador);
+			printf("anoté: %c\n", charJuego);
+			seAnoto=1;
+		}
+		else printf("Error! no puede anotar dicho juego.\n");
+	}
+	return charJuego;
+}
+
 posDados *
 tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 {
 	static posDados  result;
-
+	printf("arranco a jugar bajo pedido\n\n");
 	//recibo los dados aleatorios del servidorMesas,
 	//verifico si son para mi
 	if(idMesa==argp->idMesa){
@@ -190,13 +230,15 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 		if(idJugador==argp->idJugador){
 			//muestro los dados recibidos por pantalla..
 			printf("tirarDados:\n");
+
+			//actualizar dados..
 			for(int i=0; i<CANT_DADOS; i++)
 				dadosActuales[i]= argp->dados[i];
 				
 			mostrarDados();
 			juegosPosibles();
 			mostrarJuegosPosibles();
-			mostrarTablaPuntajes();
+			mostrarTablaPuntajes(idJugador);
 
 			//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
 			int opcionValida=0;
@@ -214,39 +256,7 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 
 			//si ingreso ANOTAR:
 			if(opcion=='a'){
-				char charJuego;
-				int nroJuego;
-				int seAnoto=0;
-				while(!seAnoto){
-					printf("ingrese el juego a anotar:\n");
-					scanf(" %c",&charJuego);
-					//casteo de char a entero
-					nroJuego= atoi(&charJuego);
-	//				printf("el nro es: %d\n", nroJuego);
-					nroJuego=nroJuego-1;
-					if(nroJuego==-1){
-						if(charJuego=='E')
-							nroJuego=E;
-						if(charJuego=='F')
-							nroJuego=F;
-						if(charJuego=='P')
-							nroJuego=P;
-						if(charJuego=='G')
-							nroJuego=G;
-						if(charJuego=='H')
-							nroJuego=GG;
-					}
-					//chequear si el juego a anotar es valido:
-					if(tablaPuntajes[idJugador][nroJuego]==-1 && posiblesJuegos[nroJuego]>0){
-						tablaPuntajes[idJugador][nroJuego]=posiblesJuegos[nroJuego];
-						printf("se agrego correctamente el juego a la tabla de puntajes.\n");
-						mostrarTablaPuntajes();
-						result.tipoJugada= charJuego;
-						printf("anoté: %c\n", charJuego);
-						seAnoto=1;
-					}
-					else printf("Error! no puede anotar dicho juego.\n");
-				}
+					result.tipoJugada = anotarJugada();
 			}
 			else if(opcion=='t'){		//si ingreso VOLVER A TIRAR:
 				printf("ingrese la cantidad a volver a tirar\n");
@@ -258,7 +268,7 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 					result.pos[i]=0;
 				for(int i=0; i<cantidad;i++){
 					scanf(" %d",&dadoNro);
-					result.pos[dadoNro]=1;
+					result.pos[dadoNro-1]=1;
 				}
 				result.tipoJugada='T';
 			}
@@ -276,10 +286,25 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 short *
 actualizar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 {
-	static short  result;
+	static short  result=0;
 	printf("actualizarDados:\n");
-	mostrarDados(argp->dados);
+	if(idMesa==argp->idMesa){
+		//verifico que no me llegaron los dados que yo tire
+		if(idJugador!=argp->idJugador){
+			//actualizar dados..
+			for(int i=0; i<CANT_DADOS; i++)
+				dadosActuales[i]= argp->dados[i];
+			
+			mostrarDados(argp->dados);
 
+			//como fue satisfatorio contesto OK
+			result= 1;
+		}
+		else
+			printf("Error! Yo tire los dados!\n");	//respondo 0
+	}
+	else 
+		printf("Error! el msje es para otra mesa\n");			//respondo 0
 	return &result;
 }
 
@@ -287,10 +312,27 @@ short *
 actualizar_tabla_1_svc(struct informacionMesa *argp, struct svc_req *rqstp)
 {
 	static short  result;
+	//recibo la informacion del jugador a actualizar..
+	if(idMesa==argp->idMesa){
 
-	/*
-	 * insert server code here
-	 */
+		short jugadorQueAnoto = argp->idJugador;
+		//verifico que los datos NO son de este jugador.
+		if(idJugador!=jugadorQueAnoto){
+			short puntajeAnotado= argp->puntajeJugada;
+			char tipoJugadaQueAnoto= argp->tipoJugada;
+			int nroJugada= obtenerNroJuego(tipoJugadaQueAnoto);
+
+			//anotamos el puntaje en la celda correspondiente
+			tablaPuntajes[jugadorQueAnoto][nroJugada]= puntajeAnotado;
+			printf("Se anoto %dpts. en el juego %d la tabla de puntajes de %d..\n", puntajeAnotado, nroJugada, jugadorQueAnoto);
+			mostrarTablaPuntajes(jugadorQueAnoto);
+		}
+		else 
+			printf("Error! esta jugada es mia!\n");
+	}
+	else 
+		printf("Error! este puntaje es de otra mesa\n");
+
 
 	return &result;
 }

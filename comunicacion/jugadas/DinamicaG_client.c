@@ -21,6 +21,7 @@
 short tablaPuntajes[MAX_JUGADORES_MESA][MAX_JUEGOS];
 char ipJugadores[MAX_JUGADORES_MESA][TAMANO_IP];
 short cantJugadoresMesa;
+short posDadosVolverATirar[CANT_DADOS];
 short idMesa;
 
 
@@ -60,7 +61,7 @@ int obtenerPuntajeJugada(char tipoJugada, int turnoActual, short dados[]){
 	return puntajeJugada;
 }
 
-void
+int
 comenzarTurnoJugador(short idJugadorActual)
 {
 	
@@ -73,78 +74,143 @@ comenzarTurnoJugador(short idJugadorActual)
 	struct informacionMesa  actualizar_tabla_arg;
 	
 	char* host= ipJugadores[idJugadorActual];
-	printf("dir: %s\n", host);
 	//para la logica de los turnos..
 	int turnoActual;
 	int quiereAnotar;
 	int puntajeJugadaActual;
 	char tipoJugadaActual;
-
-#ifndef	DEBUG
-	clnt = clnt_create (host, JUGADA, PRIMERA, "udp");
-	if (clnt == NULL) {
-		clnt_pcreateerror (host);
-		exit (1);
-	}
-#endif	/* DEBUG */
+	short dados[CANT_DADOS];
 
 	//seteo valores por defecto..
 	tirar_dados_arg.idJugador=idJugadorActual;
 	tirar_dados_arg.idMesa= idMesa;
 	turnoActual=1;
 	quiereAnotar=0;
-	
-	
 
-	//Logica de asignacion de un turno al Jugador Actual..
-	while(turnoActual<=3 && !quiereAnotar){
-		//Calculo los dados al azar para el TurnoActual
-		if(turnoActual==1)
-			for(int i=0; i<(CANT_DADOS); i++)
-					tirar_dados_arg.dados[i]=tirarDado();
-		else {
-			for(int i=0; i<(CANT_DADOS); i++)
-				if(result_posDados->pos[i]==1)
-					tirar_dados_arg.dados[i]=tirarDado();
-		}
+//SETEO LOS DADOS A ENVIAR..
+for(int i=0; i<CANT_DADOS; i++){
+	if(posDadosVolverATirar[i]==1){
+		dados[i]=tirarDado();
+	}
+}
+
+//ENVIO AL RESTO LOS DADOS PARA QUE LOS ACTUALICEN
+for(int i=0; i<CANT_DADOS; i++){
+	actualizar_dados_arg.dados[i]=dados[i];
+	tirar_dados_arg.dados[i]=dados[i];
+}
+//actualizo data de paquetes:
+actualizar_dados_arg.idJugador= idJugadorActual;
+actualizar_dados_arg.idMesa= idMesa;
+tirar_dados_arg.idJugador= idJugadorActual;
+tirar_dados_arg.idMesa= idMesa;
+for(int i=0; i<cantJugadoresMesa; i++){
+	
+	//seteo la comunicacion con cada uno de los jugadores..
+	host= ipJugadores[i];
+	if(i!=idJugadorActual){	//no es el jugador actual
 		
-		//Envio y Espero por la respuesta del Jugador
-		result_posDados = tirar_dados_1(&tirar_dados_arg, clnt);
-		if (result_posDados == (posDados *) NULL) {
+		#ifndef	DEBUG
+			clnt = clnt_create (host, JUGADA, PRIMERA, "tcp");
+			if (clnt == NULL) {
+				clnt_pcreateerror (host);
+				exit (1);
+			}
+		#endif	/* DEBUG */
+		result_2 = actualizar_dados_1(&actualizar_dados_arg, clnt);
+		if (result_2 == (short *) NULL) {
 			clnt_perror (clnt, "call failed");
 		}
 		else{
-			if(result_posDados->tipoJugada!='T'){	//quiere anotar
-				quiereAnotar=1;
-				printf("Quiere anotar\n");
-			}
-			else printf("Quiere volver a tirar\n");
+			if(*result_2==1)
+				printf("jugador %d actualizo dados correctamente\n", i);
+			else 
+				printf("Error! jugador %d no actualizo dados\n",i );
 		}
-		turnoActual++;
+		#ifndef	DEBUG
+			clnt_destroy (clnt);
+		#endif	 /* DEBUG */	
 	}
 
+}
+
+//SI ES EL JUGADOR ACTUAL..
+//seteo la comunicacion con cada uno de los jugadores..
+host= ipJugadores[idJugadorActual];
+#ifndef	DEBUG
+	clnt = clnt_create (host, JUGADA, PRIMERA, "tcp");
+	if (clnt == NULL) {
+		clnt_pcreateerror (host);
+		exit (1);
+	}
+#endif	/* DEBUG */
+
+result_posDados = tirar_dados_1(&tirar_dados_arg, clnt);
+if (result_posDados == (posDados *) NULL) {
+	clnt_perror (clnt, "call failed");
+}
+else{
+	if(result_posDados->tipoJugada!='T'){	//quiere anotar
+		printf("Quiere anotar\n");
+		quiereAnotar=1;
+	}
+	else {
+		printf("Quiere volver a tirar\n");
+		for(int i=0; i<CANT_DADOS; i++){
+			posDadosVolverATirar[i]= result_posDados->pos[i];
+		}
+			
+	}
+}
+#ifndef	DEBUG
+	clnt_destroy (clnt);
+#endif	 /* DEBUG */
+
+//EN CASO QUE QUIERA ANOTAR..
+if(quiereAnotar){
 	//determino que valor quiere anotar..,
 	tipoJugadaActual= result_posDados->tipoJugada;
 	puntajeJugadaActual= obtenerPuntajeJugada(tipoJugadaActual, turnoActual, tirar_dados_arg.dados);
 	printf("El jugador %d anoto %d al %c\n", idJugadorActual, puntajeJugadaActual, tipoJugadaActual);
-	//FALTA!!!		Enviar el nuevo puntaje al resto de los jugadores
 
-	//FALTA!!!		Termina el turno de dicho jugador y le toca al siguiente en el orden..
+	//enviamos el puntaje de la jugada para que todos anoten dicho valor..
+	actualizar_tabla_arg.idJugador=idJugadorActual;
+	actualizar_tabla_arg.idMesa=idMesa;
+	actualizar_tabla_arg.puntajeJugada=puntajeJugadaActual;
+	actualizar_tabla_arg.tipoJugada= tipoJugadaActual;
 
-	
-	//SETEO LOS CAMPOS DEL STRUCT A ENVIAR
-	/*result_2 = actualizar_dados_1(&actualizar_dados_1_arg, clnt);
-	if (result_2 == (short *) NULL) {
-		clnt_perror (clnt, "call failed");
+	for(int i=0; i<cantJugadoresMesa; i++){
+		//seteo la comunicacion con cada uno de los jugadores..
+		if(i!=idJugadorActual){	//no es el jugador actual
+			host= ipJugadores[i];
+			
+			#ifndef	DEBUG
+			clnt = clnt_create (host, JUGADA, PRIMERA, "tcp");
+			if (clnt == NULL) {
+				clnt_pcreateerror (host);
+				exit (1);
+			}
+			#endif	/* DEBUG */
+
+			result_3 = actualizar_tabla_1(&actualizar_tabla_arg, clnt);
+			if (result_3 == (short *) NULL) {
+				clnt_perror (clnt, "call failed");
+			}
+			else{
+				if(*result_3==1)
+					printf("jugador %d actualizo su tabla correctamente\n", i);
+				else 
+					printf("Error! jugador %d no actualizo tabla\n",i );
+			}
+			#ifndef	DEBUG
+			clnt_destroy (clnt);
+			#endif	 /* DEBUG */
+		}
 	}
-	result_3 = actualizar_tabla_1(&actualizar_tabla_1_arg, clnt);
-	if (result_3 == (short *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	*/
-#ifndef	DEBUG
-	clnt_destroy (clnt);
-#endif	 /* DEBUG */
+}
+
+return quiereAnotar;
+//FIN ENVIO DADOS JUGADOR ACTUAL
 }
 
 int
@@ -152,7 +218,6 @@ main (int argc, char *argv[])
 {
 	//genero la semilla para obtener los dados segun la hora.
 	srand(time(NULL));
-
 
 	//recibo por parametro el idMesa y mi nro de jugador en dicha mesa..
 	if (argc < 2) {
@@ -170,7 +235,7 @@ main (int argc, char *argv[])
     }
 	printf("cant jugadores: %d\n", cantJugadoresMesa);
 	for(int i=0; i<cantJugadoresMesa; i++){
-		printf("turno %d: %s\n", i+1, ipJugadores[i]);
+		printf("id %d: %s\n", i, ipJugadores[i]);
 	}
 
 	//incializo los valores de todos los puntajes en -1 (representa que no se anoto nada todav)
@@ -182,9 +247,32 @@ main (int argc, char *argv[])
 	//ARRANCA EL JUEGO!!
 	//esto deberia repetirse 11 veces para cada jugador..
 	
-	//PRUEBAS!!!
-	printf("jugador Actual: \t%s\n", ipJugadores[0]);
-	//for(int i=0; i<cantJugadoresMesa; i++)
-		comenzarTurnoJugador(0);
-exit (0);
+
+	//le doy un turno a cada uno de los jugadores
+	for(int ronda=1; ronda<=MAX_JUEGOS; ronda++){
+		printf("\n\t\tRONDA %d\n", ronda);
+		for(int i=0; i<cantJugadoresMesa; i++){
+			//turno de jugadorActual
+			printf("\tTurno de jugador %d\n", i);
+			int anoto=0;
+			int turnoActual=1;
+			while(!anoto&& turnoActual<=3){
+				if(turnoActual==1){
+					for(int i=0; i<CANT_DADOS; i++)
+						posDadosVolverATirar[i]=1;
+				}
+				anoto=	comenzarTurnoJugador(i);
+			//una vez que anota le pasa el turno al siguiente jugador
+			}
+		}
+	}
+	
+/*	short dados[CANT_DADOS];
+	for(int i=0; i<CANT_DADOS; i++){
+		dados[i]=i+1;
+	}
+
+	enviarTirarDado(dados, 0);	
+*/
+	exit (0);
 }
