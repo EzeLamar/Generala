@@ -32,46 +32,150 @@ short idJugador;
 short idMesa;
 
 //logica
-int nroTiro=1;
+int nroTiro;
+
+//interfaz
+char DADOS[6][5][10];
+
+void inicializarDados(){
+	//DADO UNO 
+	sprintf(DADOS[0][0],"%s","+-------+\0");
+	sprintf(DADOS[0][1],"%s","|       |\0");
+	sprintf(DADOS[0][2],"%s","|   o   |\0");
+	sprintf(DADOS[0][3],"%s","|       |\0");
+	sprintf(DADOS[0][4],"%s","+-------+\0");
+	//DADO DOS
+	sprintf(DADOS[1][0],"%s","+-------+\0");
+	sprintf(DADOS[1][1],"%s","|     o |\0");
+	sprintf(DADOS[1][2],"%s","|       |\0");
+	sprintf(DADOS[1][3],"%s","| o     |\0");
+	sprintf(DADOS[1][4],"%s","+-------+\0");
+	//DADO TRES
+	sprintf(DADOS[2][0],"%s","+-------+\0");
+	sprintf(DADOS[2][1],"%s","|     o |\0");
+	sprintf(DADOS[2][2],"%s","|   o   |\0");
+	sprintf(DADOS[2][3],"%s","| o     |\0");
+	sprintf(DADOS[2][4],"%s","+-------+\0");
+	//DADO CUATRO
+	sprintf(DADOS[3][0],"%s","+-------+\0");
+	sprintf(DADOS[3][1],"%s","| o   o |\0");
+	sprintf(DADOS[3][2],"%s","|       |\0");
+	sprintf(DADOS[3][3],"%s","| o   o |\0");
+	sprintf(DADOS[3][4],"%s","+-------+\0");
+	//DADO CINCO
+	sprintf(DADOS[4][0],"%s","+-------+\0");
+	sprintf(DADOS[4][1],"%s","| o   o |\0");
+	sprintf(DADOS[4][2],"%s","|   o   |\0");
+	sprintf(DADOS[4][3],"%s","| o   o |\0");
+	sprintf(DADOS[4][4],"%s","+-------+\0");
+	//DADO SEIS
+	sprintf(DADOS[5][0],"%s","+-------+\0");
+	sprintf(DADOS[5][1],"%s","| o   o |\0");
+	sprintf(DADOS[5][2],"%s","| o   o |\0");
+	sprintf(DADOS[5][3],"%s","| o   o |\0");
+	sprintf(DADOS[5][4],"%s","+-------+\0");
+}
+
+void dibujarDados(int d1,int d2, int d3, int d4, int d5){
+	for(int i=0; i<5; i++){
+		printf("%s  %s  %s  %s  %s\n",DADOS[d1-1][i],DADOS[d2-1][i],DADOS[d3-1][i],DADOS[d4-1][i],DADOS[d5-1][i]);
+	}
+}
 
 void mostrarDados(){
-	printf("[");
-	for(int i=0; i<CANT_DADOS; i++){
-		printf("%d,",dadosActuales[i]);
-	}
-	printf("]\n");
+
+	printf("\n");
+	dibujarDados(dadosActuales[0],dadosActuales[1],dadosActuales[2],dadosActuales[3],dadosActuales[4]);
+	
 }
 
 
-void mostrarTablaPuntajes(int jugador){
+void mostrarTablaPuntajes(){
 	int puntaje;
-	printf("Tabla Puntajes jugador %d:\n", jugador);
+	printf("TABLA PUNTAJES TOTAL:\n");
+	printf("+-+");
+	for(int i=0; i<MAX_JUGADORES_MESA; i++)
+		printf("\t+");					//1ra fila
+	printf("\n| |");
+	for(int i=0; i<MAX_JUGADORES_MESA; i++)
+		printf("  %d\t|",i);			//2da fila (idJugador)
+	printf("\n+-+");					//3ra fila
+	for(int i=0; i<MAX_JUGADORES_MESA; i++)
+		printf("\t+");
+	printf("\n");					//4ta fila
+	
+
 	for(int i=0; i<MAX_DADO; i++){
-		puntaje= tablaPuntajes[jugador][i];
-		if(puntaje>0)
-			printf("%d: %d\n", (i+1), puntaje);
+		
+		printf("|%d|", (i+1)); 
+		for(int jugador=0; jugador<MAX_JUGADORES_MESA;jugador++){
+			puntaje= tablaPuntajes[jugador][i];
+			if(puntaje>=0)
+				printf("%d\t|", puntaje);
+			else if(puntaje==-1) 
+				printf("-\t|");
+		}
+		printf("\n");
 	}
-	puntaje= tablaPuntajes[jugador][E];
-	if(puntaje>0)
-		printf("E: %d\n", puntaje);
+	printf("|E|"); 
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		puntaje= tablaPuntajes[jugador][E];
+		if(puntaje>=0)
+			printf("%d\t|", puntaje);
+		else if(puntaje==-1)
+			printf("-\t|");
+	}
+	printf("\n|F|");
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		puntaje= tablaPuntajes[jugador][F];
+		if(puntaje>=0)
+			printf("%d\t|", puntaje);
+		else if(puntaje==-1)
+			printf("-\t|");
+	}
+	printf("\n|P|");
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		puntaje= tablaPuntajes[jugador][P];
+		if(puntaje>=0)
+			printf("%d\t|", puntaje);
+		else if(puntaje==-1)
+			printf("-\t|");
+	}
+	printf("\n|G|");
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		puntaje= tablaPuntajes[jugador][G];
+		if(puntaje>=0)
+			printf("%d\t|", puntaje);
+		else if(puntaje==-1)
+			printf("-\t|");
+	}
+	printf("\n|H|");
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		puntaje= tablaPuntajes[jugador][GG];
+		if(puntaje>=0)
+			printf("%d\t|", puntaje);
+		else if(puntaje==-1)
+		printf("-\t|");
+	}
+	printf("\n|T|");
+	int totales[MAX_JUGADORES_MESA];
+	for(int i=0; i<MAX_JUGADORES_MESA; i++)
+		totales[i]=0;
 
-	puntaje= tablaPuntajes[jugador][F];
-	if(puntaje>0)
-		printf("F: %d\n", puntaje);
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++)
+		for(int i=0; i<MAX_JUEGOS; i++)
+			if(tablaPuntajes[jugador][i]>=0)
+				totales[jugador]= totales[jugador] + tablaPuntajes[jugador][i];
 
-	puntaje= tablaPuntajes[jugador][P];
-	if(puntaje>0)
-		printf("P: %d\n", puntaje);
+	for(int jugador=0; jugador<MAX_JUGADORES_MESA; jugador++ ){
+		if(totales[jugador]>=0)
+			printf("%d\t|", totales[jugador]);
+		else if(totales[jugador]==-1)
+		printf("-\t|");
+	}
 
-	puntaje= tablaPuntajes[jugador][G];
-	if(puntaje>0)
-		printf("G: %d\n", puntaje);
-
-	puntaje= tablaPuntajes[jugador][GG];
-	if(puntaje>0)
-		printf("GG: %d\n", puntaje);
-
-	printf("--------------\n");
+	printf("\n");
+	printf("------------------------------------------\n");
 }
 
 void mostrarJuegosPosibles(){
@@ -221,15 +325,15 @@ char anotarJugada(){
 posDados *
 tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 {
+	system("clear");
 	static posDados  result;
-	printf("arranco a jugar bajo pedido\n\n");
+	printf("\t\tTURNO: %d\n",nroTiro);
 	//recibo los dados aleatorios del servidorMesas,
 	//verifico si son para mi
 	if(idMesa==argp->idMesa){
 		//verifico que los dados son para este jugador
 		if(idJugador==argp->idJugador){
 			//muestro los dados recibidos por pantalla..
-			printf("tirarDados:\n");
 
 			//actualizar dados..
 			for(int i=0; i<CANT_DADOS; i++)
@@ -237,8 +341,8 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 				
 			mostrarDados();
 			juegosPosibles();
-			mostrarJuegosPosibles();
 			mostrarTablaPuntajes(idJugador);
+			mostrarJuegosPosibles();
 
 			//EL CLIENTE ELIGE SI ANOTAR O VOLVER A TIRAR (DADOS ESPECIFICOS)
 			int opcionValida=0;
@@ -257,8 +361,11 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 			//si ingreso ANOTAR:
 			if(opcion=='a'){
 					result.tipoJugada = anotarJugada();
+					nroTiro=1;
 			}
 			else if(opcion=='t'){		//si ingreso VOLVER A TIRAR:
+				nroTiro++;
+
 				printf("ingrese la cantidad a volver a tirar\n");
 				int cantidad=0;
 				scanf(" %d",&cantidad);
@@ -287,7 +394,6 @@ short *
 actualizar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 {
 	static short  result=0;
-	printf("actualizarDados:\n");
 	if(idMesa==argp->idMesa){
 		//verifico que no me llegaron los dados que yo tire
 		if(idJugador!=argp->idJugador){
@@ -295,8 +401,15 @@ actualizar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 			for(int i=0; i<CANT_DADOS; i++)
 				dadosActuales[i]= argp->dados[i];
 			
-			mostrarDados(argp->dados);
-
+			
+			if(nroTiro==1){
+				system("clear");
+				printf("\t\tTURNO JUGADOR %d\n",argp->idJugador);	
+				mostrarTablaPuntajes();
+			}	
+			printf("\tTIRO N° %d\n",nroTiro);
+			mostrarDados();
+			nroTiro++;
 			//como fue satisfatorio contesto OK
 			result= 1;
 		}
@@ -324,8 +437,9 @@ actualizar_tabla_1_svc(struct informacionMesa *argp, struct svc_req *rqstp)
 
 			//anotamos el puntaje en la celda correspondiente
 			tablaPuntajes[jugadorQueAnoto][nroJugada]= puntajeAnotado;
-			printf("Se anoto %dpts. en el juego %d la tabla de puntajes de %d..\n", puntajeAnotado, nroJugada, jugadorQueAnoto);
-			mostrarTablaPuntajes(jugadorQueAnoto);
+//			printf("Se anoto %dpts. en el juego %d la tabla de puntajes de %d..\n", puntajeAnotado, nroJugada, jugadorQueAnoto);
+//			mostrarTablaPuntajes(jugadorQueAnoto);
+			nroTiro=1;
 		}
 		else 
 			printf("Error! esta jugada es mia!\n");
@@ -338,11 +452,12 @@ actualizar_tabla_1_svc(struct informacionMesa *argp, struct svc_req *rqstp)
 }
 
 void AlIniciar(short idMesaRecibida, short idJugadorRecibido){
+	inicializarDados();
 	printf("arranque!\n");
 	//inicializo el idJugador y idMesa
 	idMesa=idMesaRecibida;
 	idJugador= idJugadorRecibido;
-
+	nroTiro=1;
 	//incializo los valores de todos los puntajes en -1 (representa que no se anoto nada todav)
 	for(int jug=0; jug<MAX_JUGADORES_MESA; jug++)
 		for(int p=0; p<MAX_JUEGOS; p++)

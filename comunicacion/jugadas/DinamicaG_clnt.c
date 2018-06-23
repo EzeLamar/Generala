@@ -7,7 +7,7 @@
 #include "DinamicaG.h"
 
 /* Default timeout can be changed using clnt_control() */
-static struct timeval TIMEOUT = { 25, 0 };
+static struct timeval TIMEOUT = { 1000, 0 };
 
 posDados *
 tirar_dados_1(struct dados *argp, CLIENT *clnt)

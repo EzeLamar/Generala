@@ -64,7 +64,6 @@ int obtenerPuntajeJugada(char tipoJugada, int turnoActual, short dados[]){
 int
 comenzarTurnoJugador(short idJugadorActual)
 {
-	
 	CLIENT *clnt;
 	posDados  *result_posDados;
 	struct dados  tirar_dados_arg;
@@ -88,10 +87,15 @@ comenzarTurnoJugador(short idJugadorActual)
 	quiereAnotar=0;
 
 //SETEO LOS DADOS A ENVIAR..
+for(int i=0; i<CANT_DADOS; i++)
+	printf("%d, ",dados[i]);
+
+printf("\n");
 for(int i=0; i<CANT_DADOS; i++){
 	if(posDadosVolverATirar[i]==1){
 		dados[i]=tirarDado();
 	}
+	printf("%d, ",dados[i]);
 }
 
 //ENVIO AL RESTO LOS DADOS PARA QUE LOS ACTUALICEN
@@ -158,6 +162,7 @@ else{
 		printf("Quiere volver a tirar\n");
 		for(int i=0; i<CANT_DADOS; i++){
 			posDadosVolverATirar[i]= result_posDados->pos[i];
+			printf("%d,", posDadosVolverATirar[i]);
 		}
 			
 	}
@@ -262,6 +267,7 @@ main (int argc, char *argv[])
 						posDadosVolverATirar[i]=1;
 				}
 				anoto=	comenzarTurnoJugador(i);
+				turnoActual++;
 			//una vez que anota le pasa el turno al siguiente jugador
 			}
 		}
