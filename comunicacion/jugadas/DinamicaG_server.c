@@ -92,7 +92,7 @@ void mostrarDados(){
 
 void mostrarTablaPuntajes(){
 	int puntaje;
-	printf("TABLA PUNTAJES TOTAL:\n");
+	printf("\tTABLA PUNTAJES TOTAL:\n");
 	printf("+-+");
 	for(int i=0; i<MAX_JUGADORES_MESA; i++)
 		printf("\t+");					//1ra fila
@@ -175,7 +175,7 @@ void mostrarTablaPuntajes(){
 	}
 
 	printf("\n");
-	printf("------------------------------------------\n");
+	printf("+-------------------------------+\n");
 }
 
 void mostrarJuegosPosibles(){
@@ -212,8 +212,12 @@ void mostrarJuegosPosibles(){
 void juegosPosibles(){
 	int contadorNros[MAX_DADO]; //arreglos que cuentan cuantos apariciones de cada numero hay.
 	
-	for(int i=0; i<CANT_DADOS;i++)
+	for(int i=0; i<MAX_DADO;i++)
 		contadorNros[i]=0;
+
+	//inicializo arreglo posiblesJuegos
+	for(int i=0; i<MAX_JUEGOS; i++)
+		posiblesJuegos[i]=0;
 
 	//cuento las apariciones de cada uno de los nros entre los 5 dados.
 	for(int i=0; i<CANT_DADOS;i++){
@@ -226,6 +230,8 @@ void juegosPosibles(){
 	while(pos<MAX_DADO)
 		if(contadorNros[pos]==5){
 			posiblesJuegos[G]=50;
+			if(nroTiro==1)
+				posiblesJuegos[P]+=5;
 			break;
 		}
 		else pos++;
@@ -234,10 +240,12 @@ void juegosPosibles(){
 		posiblesJuegos[G]=0;
 
 	//busco POKER
-	pos=0;
+	pos=0;	
 	while(pos<MAX_DADO)
 		if(contadorNros[pos]>=4){
 			posiblesJuegos[P]=40;
+			if(nroTiro==1)
+				posiblesJuegos[P]+=5;
 			break;
 		}
 		else pos++;
@@ -255,8 +263,11 @@ void juegosPosibles(){
 			hayTres=1;
 		pos++;
 	}
-	if(hayDos && hayTres)
+	if(hayDos && hayTres){
 		posiblesJuegos[F]=30;
+		if(nroTiro==1)
+			posiblesJuegos[P]+=5;
+	}	
 	else
 		posiblesJuegos[F]=0;
 
@@ -271,8 +282,11 @@ void juegosPosibles(){
 
 		else cantSeguidos=0;
 	}
-	if(cantSeguidos==5)
+	if(cantSeguidos==5){
 		posiblesJuegos[E]=20;
+		if(nroTiro==1)
+			posiblesJuegos[P]+=5;
+	}
 	else 
 		posiblesJuegos[E]=0;
 
@@ -312,9 +326,9 @@ char anotarJugada(){
 		//chequear si el juego a anotar es valido:
 		if(tablaPuntajes[idJugador][nroJuego]==-1 && posiblesJuegos[nroJuego]>0){
 			tablaPuntajes[idJugador][nroJuego]=posiblesJuegos[nroJuego];
-			printf("se agrego correctamente el juego a la tabla de puntajes.\n");
-			mostrarTablaPuntajes(idJugador);
-			printf("anoté: %c\n", charJuego);
+//			printf("se agrego correctamente el juego a la tabla de puntajes.\n");
+//			mostrarTablaPuntajes(idJugador);
+//			printf("anoté: %c\n", charJuego);
 			seAnoto=1;
 		}
 		else printf("Error! no puede anotar dicho juego.\n");
@@ -458,9 +472,11 @@ void AlIniciar(short idMesaRecibida, short idJugadorRecibido){
 	idMesa=idMesaRecibida;
 	idJugador= idJugadorRecibido;
 	nroTiro=1;
+	
 	//incializo los valores de todos los puntajes en -1 (representa que no se anoto nada todav)
 	for(int jug=0; jug<MAX_JUGADORES_MESA; jug++)
 		for(int p=0; p<MAX_JUEGOS; p++)
 			tablaPuntajes[jug][p]=-1;
+
 	printf("..termine de cargar los puntajes iniciales\n");
 }

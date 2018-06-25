@@ -23,6 +23,7 @@ char ipJugadores[MAX_JUGADORES_MESA][TAMANO_IP];
 short cantJugadoresMesa;
 short posDadosVolverATirar[CANT_DADOS];
 short idMesa;
+int turnoActual;
 
 
 int tirarDado(){
@@ -74,7 +75,6 @@ comenzarTurnoJugador(short idJugadorActual)
 	
 	char* host= ipJugadores[idJugadorActual];
 	//para la logica de los turnos..
-	int turnoActual;
 	int quiereAnotar;
 	int puntajeJugadaActual;
 	char tipoJugadaActual;
@@ -83,7 +83,6 @@ comenzarTurnoJugador(short idJugadorActual)
 	//seteo valores por defecto..
 	tirar_dados_arg.idJugador=idJugadorActual;
 	tirar_dados_arg.idMesa= idMesa;
-	turnoActual=1;
 	quiereAnotar=0;
 
 //SETEO LOS DADOS A ENVIAR..
@@ -260,7 +259,7 @@ main (int argc, char *argv[])
 			//turno de jugadorActual
 			printf("\tTurno de jugador %d\n", i);
 			int anoto=0;
-			int turnoActual=1;
+			turnoActual=1;
 			while(!anoto&& turnoActual<=3){
 				if(turnoActual==1){
 					for(int i=0; i<CANT_DADOS; i++)
