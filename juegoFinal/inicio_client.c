@@ -10,6 +10,10 @@
 #define CREAR_MESA 1
 #define UNIRSE_MESA 2
 
+#define IP_NODOMESA "192.168.0.18"
+#define IP_ACTUAL "localhost"
+
+
 
 void
 partida_1(char *host, int opcion, int cantJugadores)
@@ -20,8 +24,12 @@ partida_1(char *host, int opcion, int cantJugadores)
 	datosJugador  unirse_partida_arg;
 	int conexionCorrecta=0;
 
+	//logica
+	short idMesa;
+	short idJugador;
+
 #ifndef	DEBUG
-	clnt = clnt_create (host, PARTIDA, PRIMER, "udp");
+	clnt = clnt_create (IP_NODOMESA, PARTIDA, PRIMER, "tcp");
 	if (clnt == NULL) {
 		clnt_pcreateerror (host);
 		exit (1);
@@ -31,7 +39,7 @@ partida_1(char *host, int opcion, int cantJugadores)
 		case CREAR_MESA:{
 			crear_mesa_arg.cantJugadores=cantJugadores;
 			//DEBERIA SOLICITAR LA IP DEL EQUIPO..
-			sprintf(crear_mesa_arg.ipCreador, "%s","192.168.0.1");
+			sprintf(crear_mesa_arg.ipCreador, "%s",host);
 
 			result = crear_mesa_1(&crear_mesa_arg, clnt);
 			if (result == (datosMesa *) NULL) {
@@ -39,7 +47,9 @@ partida_1(char *host, int opcion, int cantJugadores)
 				printf("Error! no se pudo unir a una mesa\n");
 			}
 			else{
-				printf("El jugador %d creo la mesa:%d\n",result->idJugador ,result->idMesa);
+				idMesa= result->idMesa;
+				idJugador= result->idJugador;
+				printf("El jugador %d creo la mesa:%d\n",idJugador,idMesa);
 				conexionCorrecta=1;
 			}
 		}break;
@@ -47,7 +57,7 @@ partida_1(char *host, int opcion, int cantJugadores)
 		case UNIRSE_MESA:{
 
 			//DEBERIA SOLICITAR LA IP DEL EQUIPO..
-			sprintf(unirse_partida_arg.ipJugador, "%s","192.168.0.5");
+			sprintf(unirse_partida_arg.ipJugador, "%s",host);
 
 			result = unirse_partida_1(&unirse_partida_arg, clnt);
 			if (result == (datosMesa *) NULL) {
@@ -55,8 +65,10 @@ partida_1(char *host, int opcion, int cantJugadores)
 				printf("Error! no se pudo unir a una mesa\n");
 			}
 			else{
+				idMesa= result->idMesa;
+				idJugador= result->idJugador;
 				if(result->idMesa!=-1){
-					printf("se unio el Jugador %d a la mesa: %d\n", result->idJugador, result->idMesa);
+					printf("se unio el Jugador %d a la mesa: %d\n", idJugador, idMesa);
 					conexionCorrecta=1;
 				}
 					
@@ -65,16 +77,28 @@ partida_1(char *host, int opcion, int cantJugadores)
 			}
 		}break;
 	}
-	//ACA LLAMAMOS AL SERVER RPC JUGADAS..
-	if(conexionCorrecta){
-		printf("llamamos al RPC jugadas!\nEsperamos a que comience la partida\n");
-	}
 	
 #ifndef	DEBUG
 	clnt_destroy (clnt);
 #endif	 /* DEBUG */
+
+//ejecuto la partida
+if(conexionCorrecta){
+	char * llamadoServidor = malloc(30);
+	sprintf(llamadoServidor, "./DinamicaG_server %d %d", idMesa, idJugador);
+	printf("llamo al servidor de juegos\n");
+	system(llamadoServidor);
+	free(llamadoServidor);
+	printf("termino el juego\n");
 }
 
+}
+
+void help(char *argv[]){
+	printf ("usage: %s IP_JUGADOR OPCION [CANTJUGADORES]\n", argv[0]);
+	printf (" OPCION:\n\t1=crearMesa [CANTJUGADORES]\n\t2=unirseMesa ");
+	printf ("CANTJUGADORES: 2-3-4\n");
+}
 
 int
 main (int argc, char *argv[])
@@ -83,12 +107,15 @@ main (int argc, char *argv[])
 	int opcion;
 	int cantJugadores=0;
 
-	if (argc < 3 | argc > 5 ) {
-		printf ("usage: %s server_host OPCION [CANTJUGADORES]\n", argv[0]);
-		printf (" OPCION:\n\t1=crearMesa\n\t2=unirseMesa");
-		printf ("CANTJUGADORES: 2-3-4");
+	if (argc < 3 | argc>5 ) {
+		help(argv);
 		exit (1);
 	}
+	if(argc==3&&(atoi(argv[2])!=2)){
+		help(argv);
+		exit (1);
+	}
+		
 
 	host = argv[1];
 	opcion= atoi(argv[2]);

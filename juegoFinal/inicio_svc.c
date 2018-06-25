@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include <unistd.h>
+
 #ifndef SIG_PF
 #define SIG_PF void(*)(int)
 #endif
@@ -63,7 +65,14 @@ partida_1(struct svc_req *rqstp, register SVCXPRT *transp)
 	}
 	if(noQuedanLugares()){
 			printf("se terminaron los lugares\n");
-			system("echo LLAMO A JUGADAS RPC");
+			//ejecuto la partida
+			char * llamadoServidor = malloc(30);
+			sprintf(llamadoServidor, "./DinamicaG_client 1");
+			printf("llamo al cliente del NODO MESAS\n");
+			sleep(2);
+			system(llamadoServidor);
+			free(llamadoServidor);
+			printf("termino el juego\n");
 		}
 	else printf("no se terminaron\n");
 
