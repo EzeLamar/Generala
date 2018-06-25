@@ -231,7 +231,7 @@ void juegosPosibles(){
 		if(contadorNros[pos]==5){
 			posiblesJuegos[G]=50;
 			if(nroTiro==1)
-				posiblesJuegos[P]+=5;
+				posiblesJuegos[G]+=5;
 			break;
 		}
 		else pos++;
@@ -266,7 +266,7 @@ void juegosPosibles(){
 	if(hayDos && hayTres){
 		posiblesJuegos[F]=30;
 		if(nroTiro==1)
-			posiblesJuegos[P]+=5;
+			posiblesJuegos[F]+=5;
 	}	
 	else
 		posiblesJuegos[F]=0;
@@ -285,7 +285,7 @@ void juegosPosibles(){
 	if(cantSeguidos==5){
 		posiblesJuegos[E]=20;
 		if(nroTiro==1)
-			posiblesJuegos[P]+=5;
+			posiblesJuegos[E]+=5;
 	}
 	else 
 		posiblesJuegos[E]=0;
@@ -353,7 +353,8 @@ tirar_dados_1_svc(struct dados *argp, struct svc_req *rqstp)
 			//actualizar dados..
 			for(int i=0; i<CANT_DADOS; i++)
 				dadosActuales[i]= argp->dados[i];
-				
+			for(int i=0; i<CANT_DADOS;i++)
+				dadosActuales[i]=i+1;	
 			mostrarDados();
 			juegosPosibles();
 			mostrarTablaPuntajes(idJugador);
